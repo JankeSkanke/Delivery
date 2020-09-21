@@ -65,9 +65,6 @@ function Write-LogEntry {
 		Write-Warning -Message "Unable to append log entry to $LogFileName.log file. Error message at line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
 	}
 }
-    #Variables
-#$clientId = "990f6cde-afd9-41db-99ef-20bfa9af615e"
-#$tenantId = "e87630f5-66df-47f3-8747-84801dbf1be7"
 
 #Detect if module exists and exit if missing
 Try 
@@ -129,21 +126,21 @@ do {
 } until (!($uri))
 # Return the result and filter the result according to our needs
 Write-LogEntry -Value "Number of objects returned $($QueryResults.count)" -Severity 1
-$Users = $QueryResults | Where-Object { $_.mobilePhone -match '[0-9]' }
-    foreach ($User in $Users) {
-        #Get api uri
-        $Uri = 'https://graph.microsoft.com/beta/users/{0}/authentication/phoneMethods' -f $user.id
-        $PhoneMethods = Invoke-RestMethod -Method Get -Uri $Uri -ContentType "application/json" -Headers $Header -ErrorAction Continue
-        if ($PhoneMethods.value) {
-                    Write-LogEntry -Value "NOCHANGE: $($user.userPrincipalName) already has authenticationPhone registered [$($phonemethods.phoneNumber)]" -Severity 1
-        }
-        else {
-            Write-LogEntry -Value "ADD: Register [$($user.mobilePhone)] for $($user.userPrincipalName)" -Severity 1
-            $Payload = @{
-                phoneNumber = $user.mobilePhone
-                phoneType   = "mobile"
-            } | ConvertTo-Json
-            Invoke-RestMethod -Method Post -Uri $Uri -Body $Payload -ContentType "application/json" -Headers $Header -ErrorAction Continue
+$Users = $QueryResults |Â Where-ObjectÂ {Â $_.mobilePhoneÂ -matchÂ '[0-9]'Â }
+    foreachÂ ($UserÂ inÂ $Users)Â {
+        #GetÂ apiÂ uri
+    Â Â Â Â $UriÂ =Â 'https://graph.microsoft.com/beta/users/{0}/authentication/phoneMethods'Â -fÂ $user.id
+    Â Â Â Â $PhoneMethodsÂ =Â Invoke-RestMethod -Method Get -Uri $Uri -ContentType "application/json" -Headers $Header -ErrorAction Continue
+    Â Â Â Â ifÂ ($PhoneMethods.value)Â {
+        Â Â Â Â Â Â Â Â     Write-LogEntry -ValueÂ "NOCHANGE:Â $($user.userPrincipalName)Â alreadyÂ hasÂ authenticationPhoneÂ registeredÂ [$($phonemethods.phoneNumber)]" -Severity 1
+    Â Â Â Â }
+        elseÂ {
+            Write-LogEntry -ValueÂ "ADD:Â RegisterÂ [$($user.mobilePhone)]Â forÂ $($user.userPrincipalName)" -Severity 1
+    Â Â Â Â Â Â Â Â $PayloadÂ =Â @{
+    Â Â Â Â Â Â Â Â Â Â Â Â phoneNumberÂ =Â $user.mobilePhone
+    Â Â Â Â Â Â Â Â Â Â Â Â phoneTypeÂ Â Â =Â "mobile"
+    Â Â Â Â Â Â Â Â } | ConvertTo-Json
+    Â Â Â Â Â Â Â Â Invoke-RestMethod -Method Post -Uri $Uri -Body $Payload -ContentType "application/json" -Headers $Header -ErrorAction Continue
         }
     }
 }
